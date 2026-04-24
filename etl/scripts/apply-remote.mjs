@@ -13,7 +13,7 @@ const files = readdirSync(outputDir)
 for (const f of files) {
   const absPath = join(outputDir, f);
   console.log(`→ applying ${f} (remote)`);
-  execSync(`wrangler d1 execute ${DB} --remote -y --file="${absPath}"`, {
+  execSync(`npx wrangler d1 execute ${DB} --remote -y --file="${absPath}"`, {
     stdio: "inherit",
     cwd: projectRoot,
   });
