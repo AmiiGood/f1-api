@@ -25,7 +25,7 @@ Data derived from Jolpica-F1 under non-commercial terms. If you use this API, a 
         license: { name: "Data: CC BY 4.0 (Jolpica)", url: "https://creativecommons.org/licenses/by/4.0/" },
     },
     servers: [
-        { url: "https://f1-api.sweetcode.workers.dev", description: "Production" },
+        { url: "https://f1api.sweetcode.app", description: "Production" },
     ],
     tags: [
         { name: "Seasons", description: "F1 seasons from 1950 to present" },

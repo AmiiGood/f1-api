@@ -5,6 +5,12 @@
 	"compatibility_flags": [
 		"nodejs_compat"
 	],
+	"routes": [
+		{
+			"pattern": "f1api.sweetcode.app",
+			"custom_domain": true
+		}
+	],
 	"d1_databases": [
 		{
 			"binding": "DB",
@@ -18,12 +24,6 @@
 			"bucket_name": "f1-api-assets"
 		}
 	],
-	"observability": {
-		"enabled": true
-	},
-	"vars": {
-		"ENVIRONMENT": "development"
-	},
 	"unsafe": {
 		"bindings": [
 			{
@@ -36,5 +36,11 @@
 				}
 			}
 		]
+	},
+	"observability": {
+		"enabled": true
+	},
+	"vars": {
+		"ENVIRONMENT": "production"
 	}
 }
