@@ -12,7 +12,8 @@
     "etl:enrich": "tsx src/index.ts enrich",
     "inspect": "tsx src/inspect-dump.ts",
     "etl:dump": "tsx src/index.ts dump",
-    "download": "tsx src/download-dump.ts"
+    "download": "tsx src/download-dump.ts",
+    "etl:assets": "tsx src/enrich-assets.ts"
   },
   "keywords": [],
   "author": "",
@@ -25,6 +26,7 @@
   },
   "dependencies": {
     "csv-parse": "^6.2.1",
-    "p-limit": "^7.3.0"
+    "p-limit": "^7.3.0",
+    "sharp": "^0.34.5"
   }
 }
