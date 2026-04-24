@@ -1,8 +1,9 @@
-import { createWriteStream, mkdirSync, existsSync } from "node:fs";
+import { createWriteStream, mkdirSync } from "node:fs";
 import { pipeline } from "node:stream/promises";
 import { Readable } from "node:stream";
 import { execSync } from "node:child_process";
 import { join } from "node:path";
+import { platform } from "node:os";
 
 const DUMP_URL = "https://api.jolpi.ca/data/dumps/download/delayed/?dump_type=csv";
 const DUMP_DIR = "dump";
@@ -21,8 +22,15 @@ async function main() {
 
     console.log(`→ Extracting`);
     mkdirSync(CSV_DIR, { recursive: true });
-    // tar viene con Windows 10+ y todos los runners de GitHub Actions
-    execSync(`tar -xf "${ZIP_PATH}" -C "${CSV_DIR}"`, { stdio: "inherit" });
+
+    if (platform() === "win32") {
+        // Windows bsdtar soporta zip
+        execSync(`tar -xf "${ZIP_PATH}" -C "${CSV_DIR}"`, { stdio: "inherit" });
+    } else {
+        // Linux/macOS
+        execSync(`unzip -o "${ZIP_PATH}" -d "${CSV_DIR}"`, { stdio: "inherit" });
+    }
+
     console.log(`  ✓ extracted to ${CSV_DIR}`);
 }
 
