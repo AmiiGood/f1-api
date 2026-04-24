@@ -1,0 +1,8 @@
+node_modules/
+.wrangler/
+etl/node_modules/
+etl/output/
+etl/dump/
+.env
+*.log
+dist/

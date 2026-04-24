@@ -1,0 +1,40 @@
+{
+	"name": "f1-api",
+	"main": "src/index.ts",
+	"compatibility_date": "2025-01-01",
+	"compatibility_flags": [
+		"nodejs_compat"
+	],
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "f1-api-db",
+			"database_id": "e9139ae2-36dd-4b12-86f8-80117bcd6864"
+		}
+	],
+	"r2_buckets": [
+		{
+			"binding": "ASSETS",
+			"bucket_name": "f1-api-assets"
+		}
+	],
+	"observability": {
+		"enabled": true
+	},
+	"vars": {
+		"ENVIRONMENT": "development"
+	},
+	"unsafe": {
+		"bindings": [
+			{
+				"name": "API_RATE_LIMITER",
+				"type": "ratelimit",
+				"namespace_id": "1001",
+				"simple": {
+					"limit": 60,
+					"period": 60
+				}
+			}
+		]
+	}
+}

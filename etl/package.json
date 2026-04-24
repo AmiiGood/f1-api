@@ -1,0 +1,29 @@
+{
+  "name": "etl",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "etl:core": "tsx src/index.ts core",
+    "etl:year": "tsx src/index.ts year",
+    "etl:all": "tsx src/index.ts all",
+    "apply:local": "node scripts/apply-local.mjs",
+    "apply:remote": "node scripts/apply-remote.mjs",
+    "etl:enrich": "tsx src/index.ts enrich",
+    "inspect": "tsx src/inspect-dump.ts",
+    "etl:dump": "tsx src/index.ts dump"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "devDependencies": {
+    "@types/node": "^25.6.0",
+    "tsx": "^4.21.0",
+    "typescript": "^6.0.3"
+  },
+  "dependencies": {
+    "csv-parse": "^6.2.1",
+    "p-limit": "^7.3.0"
+  }
+}
