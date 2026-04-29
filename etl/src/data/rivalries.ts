@@ -207,4 +207,171 @@ export const RIVALRIES: RivalrySeed[] = [
             },
         ],
     },
+    {
+        id: "schumacher-vs-hill",
+        driverA: "michael-schumacher",
+        driverB: "damon-hill",
+        startYear: 1994,
+        endYear: 1995,
+        era: "v10",
+        intensity: "legendary",
+        description: {
+            en: "A bitter rivalry born from tragedy. After Senna's death at Imola in 1994, Hill inherited Williams' title charge against Schumacher's Benetton. The championship was decided when Schumacher collided with Hill at Adelaide, handing Michael his first title amid accusations of intentional contact.",
+            es: "Una rivalidad amarga nacida de la tragedia. Tras la muerte de Senna en Imola en 1994, Hill heredó la lucha por el título de Williams contra el Benetton de Schumacher. El campeonato se decidió cuando Schumacher chocó con Hill en Adelaida, dándole a Michael su primer título entre acusaciones de contacto intencional.",
+        },
+        keyRaces: [
+            {
+                raceId: "1994-australian-gp",
+                significance: {
+                    en: "Schumacher hits the wall and Hill attempts to pass; contact between them ends Hill's race and hands Schumacher his first world title by a single point.",
+                    es: "Schumacher golpea el muro y Hill intenta pasarlo; el contacto entre ambos termina la carrera de Hill y le da a Schumacher su primer título mundial por un solo punto.",
+                },
+            },
+            {
+                raceId: "1994-british-gp",
+                significance: {
+                    en: "Schumacher ignores a black flag for overtaking Hill on the formation lap, sparking a two-race ban and fuelling the championship controversy.",
+                    es: "Schumacher ignora una bandera negra por adelantar a Hill en la vuelta de formación, lo que le costó una suspensión de dos carreras y alimentó la controversia del campeonato.",
+                },
+            },
+        ],
+    },
+    {
+        id: "villeneuve-vs-schumacher",
+        driverA: "jacques-villeneuve",
+        driverB: "michael-schumacher",
+        startYear: 1997,
+        endYear: 1997,
+        era: "v10",
+        intensity: "intense",
+        description: {
+            en: "The 1997 title fight climaxed at Jerez, where Schumacher deliberately turned into Villeneuve's Williams. Unlike Adelaide 1994, this time Schumacher retired while Villeneuve continued to clinch the title. The FIA stripped Schumacher of his entire championship classification as punishment.",
+            es: "La lucha por el título de 1997 culminó en Jerez, donde Schumacher giró deliberadamente hacia el Williams de Villeneuve. A diferencia de Adelaida 1994, esta vez Schumacher abandonó mientras Villeneuve continuó para ganar el título. La FIA le retiró a Schumacher toda su clasificación del campeonato como castigo.",
+        },
+        keyRaces: [
+            {
+                raceId: "1997-european-gp",
+                significance: {
+                    en: "At the season finale in Jerez, Schumacher deliberately turns into Villeneuve but bounces off into the gravel, handing Jacques the championship and earning Michael a disqualification from the entire season's standings.",
+                    es: "En la última carrera de la temporada en Jerez, Schumacher gira deliberadamente hacia Villeneuve pero rebota hacia la gravilla, dándole a Jacques el campeonato y ganándose Michael la descalificación de toda la clasificación de la temporada.",
+                },
+            },
+        ],
+    },
+    {
+        id: "vettel-vs-hamilton",
+        driverA: "sebastian-vettel",
+        driverB: "lewis-hamilton",
+        startYear: 2017,
+        endYear: 2018,
+        era: "hybrid",
+        intensity: "intense",
+        description: {
+            en: "Ferrari's best chance to dethrone Mercedes in the hybrid era. Vettel led both championships at mid-season before costly errors and reliability issues saw his challenges collapse, most dramatically in the rain at Hockenheim 2018.",
+            es: "La mejor oportunidad de Ferrari para destronar a Mercedes en la era híbrida. Vettel lideraba ambos campeonatos a mitad de temporada antes de que errores costosos y problemas de fiabilidad hicieran colapsar sus desafíos, más dramáticamente bajo la lluvia en Hockenheim 2018.",
+        },
+        keyRaces: [
+            {
+                raceId: "2017-azerbaijan-gp",
+                significance: {
+                    en: "Vettel deliberately drives into Hamilton's car side-by-side behind the safety car, earning a ten-second stop-and-go penalty and widespread condemnation.",
+                    es: "Vettel golpea deliberadamente el coche de Hamilton lado a lado detrás del safety car, ganándose una penalización de diez segundos de stop-and-go y condena generalizada.",
+                },
+            },
+            {
+                raceId: "2018-german-gp",
+                significance: {
+                    en: "Leading the race at home, Vettel crashes out at the Sachs Kurve in light rain, handing Hamilton a shock victory and shifting the title momentum permanently.",
+                    es: "Liderando la carrera en casa, Vettel se sale en la Sachs Kurve bajo lluvia ligera, regalándole a Hamilton una victoria sorpresiva y cambiando el impulso del título de forma permanente.",
+                },
+            },
+        ],
+    },
+    {
+        id: "leclerc-vs-verstappen",
+        driverA: "charles-leclerc",
+        driverB: "max-verstappen",
+        startYear: 2019,
+        endYear: null,
+        era: "hybrid",
+        intensity: "notable",
+        description: {
+            en: "A rivalry rooted in their karting days, reignited when both emerged as the future of F1. Their 2019 battles at Silverstone and Spielberg were wheel-to-wheel classics, and the 2022 season opened with a spectacular duel before Red Bull's superiority proved decisive.",
+            es: "Una rivalidad enraizada en sus días de karting, reavivada cuando ambos emergieron como el futuro de la F1. Sus batallas de 2019 en Silverstone y Spielberg fueron clásicos rueda a rueda, y la temporada 2022 abrió con un duelo espectacular antes de que la superioridad de Red Bull resultara decisiva.",
+        },
+        keyRaces: [
+            {
+                raceId: "2019-austrian-gp",
+                significance: {
+                    en: "Verstappen forces past Leclerc on the penultimate lap with aggressive contact, sparking debate over racing standards and igniting the rivalry.",
+                    es: "Verstappen fuerza el adelantamiento sobre Leclerc en la penúltima vuelta con contacto agresivo, generando debate sobre los estándares de carrera y encendiendo la rivalidad.",
+                },
+            },
+            {
+                raceId: "2022-bahrain-gp",
+                significance: {
+                    en: "Leclerc and Verstappen swap the lead multiple times in an epic season-opening duel; Leclerc prevails as Verstappen retires with a fuel system failure.",
+                    es: "Leclerc y Verstappen intercambian el liderato varias veces en un duelo épico de apertura de temporada; Leclerc prevalece mientras Verstappen abandona por una falla del sistema de combustible.",
+                },
+            },
+        ],
+    },
+    {
+        id: "prost-vs-mansell",
+        driverA: "alain-prost",
+        driverB: "nigel-mansell",
+        startYear: 1986,
+        endYear: 1990,
+        era: "turbo-to-v10",
+        intensity: "notable",
+        description: {
+            en: "A multi-year feud across Williams and Ferrari. Their 1986 title fight at Adelaide, where Mansell's tyre blew gifting Prost the crown, set the tone. When Prost joined Ferrari in 1990, Mansell was pushed to resign after feeling undermined by the Frenchman's political maneuvering.",
+            es: "Una enemistad de varios años entre Williams y Ferrari. Su pelea por el título de 1986 en Adelaida, donde el reventón de Mansell le regaló la corona a Prost, marcó el tono. Cuando Prost se unió a Ferrari en 1990, Mansell se vio empujado a renunciar al sentirse socavado por las maniobras políticas del francés.",
+        },
+        keyRaces: [
+            {
+                raceId: "1986-australian-gp",
+                significance: {
+                    en: "Mansell's tyre dramatically explodes on the Adelaide straight while leading; Prost takes the win and the championship in a three-way finale with Piquet.",
+                    es: "El neumático de Mansell explota dramáticamente en la recta de Adelaida mientras lideraba; Prost se lleva la victoria y el campeonato en un final a tres con Piquet.",
+                },
+            },
+            {
+                raceId: "1990-british-gp",
+                significance: {
+                    en: "Mansell announces his retirement from Ferrari mid-season, frustrated by Prost's influence within the team, only to return to Williams in 1991.",
+                    es: "Mansell anuncia su retiro de Ferrari a mitad de temporada, frustrado por la influencia de Prost dentro del equipo, solo para regresar a Williams en 1991.",
+                },
+            },
+        ],
+    },
+    {
+        id: "villeneuve-vs-pironi",
+        driverA: "gilles-villeneuve",
+        driverB: "didier-pironi",
+        startYear: 1982,
+        endYear: 1982,
+        era: "3L",
+        intensity: "legendary",
+        description: {
+            en: "One of F1's most tragic rivalries. At the 1982 San Marino GP, Pironi ignored team orders to overtake Villeneuve on the final lap, stealing victory from his teammate. Villeneuve was devastated and vowed never to speak to Pironi again. Two weeks later, Villeneuve was killed in qualifying at Zolder while trying to beat Pironi's time.",
+            es: "Una de las rivalidades más trágicas de la F1. En el GP de San Marino de 1982, Pironi ignoró las órdenes de equipo para adelantar a Villeneuve en la última vuelta, robándole la victoria a su compañero. Villeneuve quedó devastado y juró no volver a hablarle a Pironi. Dos semanas después, Villeneuve murió en la clasificación de Zolder intentando superar el tiempo de Pironi.",
+        },
+        keyRaces: [
+            {
+                raceId: "1982-san-marino-gp",
+                significance: {
+                    en: "Pironi defies Ferrari team orders by overtaking Villeneuve on the final lap to steal victory, a betrayal that consumed Villeneuve for the rest of his tragically short life.",
+                    es: "Pironi desafía las órdenes de equipo de Ferrari adelantando a Villeneuve en la última vuelta para robar la victoria, una traición que consumió a Villeneuve durante el resto de su trágicamente corta vida.",
+                },
+            },
+            {
+                raceId: "1982-belgian-gp",
+                significance: {
+                    en: "Villeneuve is killed in qualifying at Zolder, attempting to beat Pironi's time — a direct consequence of the betrayal at Imola two weeks earlier.",
+                    es: "Villeneuve muere en la clasificación de Zolder, intentando superar el tiempo de Pironi — una consecuencia directa de la traición en Imola dos semanas antes.",
+                },
+            },
+        ],
+    },
 ];

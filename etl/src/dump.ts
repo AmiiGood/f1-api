@@ -193,15 +193,30 @@ export async function etlFromDump() {
     }
 
     const raceSessionByRound = new Map<string, string>();
+    const sprintSessionByRound = new Map<string, string>();
     const qualiByRound = new Map<string, { q?: string; q1?: string; q2?: string; q3?: string }>();
+    const sprintQualiByRound = new Map<string, { sq1?: string; sq2?: string; sq3?: string }>();
+    const sprintShootoutByRound = new Map<string, { sq1?: string; sq2?: string; sq3?: string }>();
+
     for (const s of sessions) {
         if (s.is_cancelled === "t") continue;
-        if (s.type === "R") raceSessionByRound.set(s.round_id, s.id);
-        else if (["Q", "Q1", "Q2", "Q3"].includes(s.type)) {
+        if (s.type === "R") {
+            raceSessionByRound.set(s.round_id, s.id);
+        } else if (s.type === "S" || s.type === "SR") {
+            // Sprint race: "S" (2021-2022) o "SR" (2023+)
+            sprintSessionByRound.set(s.round_id, s.id);
+        } else if (["Q", "Q1", "Q2", "Q3"].includes(s.type)) {
             const cur = qualiByRound.get(s.round_id) ?? {};
             const key = s.type.toLowerCase() as "q" | "q1" | "q2" | "q3";
             cur[key] = s.id;
             qualiByRound.set(s.round_id, cur);
+        } else if (["SS", "SS1", "SS2", "SS3", "SQ", "SQ1", "SQ2", "SQ3"].includes(s.type)) {
+            // Sprint Shootout (2023) o Sprint Qualifying (2024+)
+            const cur = sprintQualiByRound.get(s.round_id) ?? {};
+            const normalized = s.type.replace(/^S[SQ]/, "sq").toLowerCase();
+            const key = (normalized === "sq" ? "sq1" : normalized) as "sq1" | "sq2" | "sq3";
+            cur[key] = s.id;
+            sprintQualiByRound.set(s.round_id, cur);
         }
     }
 
@@ -286,41 +301,120 @@ export async function etlFromDump() {
     await writeSQL("07_qualifying.sql", qLines.join("\n"));
     console.log(`✓ 07_qualifying.sql`);
 
+    // ── 07b sprint_results ──
+    const sprintResultLines: string[] = ["DELETE FROM sprint_results;"];
+    for (const [roundId, sessionId] of sprintSessionByRound) {
+        const info = roundInfo.get(roundId);
+        if (!info) continue;
+        const entries = entriesBySession.get(sessionId) ?? [];
+        for (const e of entries) {
+            const re = roundEntryInfo.get(e.round_entry_id);
+            if (!re) continue;
+            const numPos = e.position && /^\d+$/.test(e.position) ? parseInt(e.position) : null;
+            sprintResultLines.push(
+                `INSERT INTO sprint_results (race_id, driver_id, constructor_id, position, position_text, grid, laps, time_ms, status, points, fastest_lap, fastest_lap_time) VALUES (` +
+                [
+                    sqlEscape(info.raceId),
+                    sqlEscape(re.driverSlug),
+                    sqlEscape(re.teamSlug),
+                    sqlEscape(numPos),
+                    sqlEscape(numPos ? String(numPos) : (e.detail || "R")),
+                    sqlEscape(e.grid ? parseInt(e.grid) : null),
+                    sqlEscape(e.laps_completed ? parseInt(e.laps_completed) : null),
+                    sqlEscape(timeToMs(e.time || null)),
+                    sqlEscape(e.detail || "Finished"),
+                    sqlEscape(e.points ? parseFloat(e.points) : 0),
+                    e.fastest_lap_rank === "1" ? 1 : 0,
+                    sqlEscape(null),
+                ].join(", ") + `);`
+            );
+        }
+    }
+    // Marca has_sprint en races
+    sprintResultLines.push(
+        `UPDATE races SET has_sprint = 1 WHERE id IN (SELECT DISTINCT race_id FROM sprint_results);`
+    );
+    await writeSQL("07b_sprint_results.sql", sprintResultLines.join("\n"));
+    console.log(`✓ 07b_sprint_results.sql (${sprintSessionByRound.size} sprint races)`);
+
+    // ── 07c sprint_qualifying ──
+    const sqLines: string[] = ["DELETE FROM sprint_qualifying;"];
+    for (const [roundId, sq] of sprintQualiByRound) {
+        const info = roundInfo.get(roundId);
+        if (!info) continue;
+        type SQR = { re: string; pos: number | null; sq1?: string; sq2?: string; sq3?: string };
+        const byEntry = new Map<string, SQR>();
+        const addSess = (sId: string | undefined, field: "sq1" | "sq2" | "sq3") => {
+            if (!sId) return;
+            for (const e of entriesBySession.get(sId) ?? []) {
+                const row = byEntry.get(e.round_entry_id) ?? { re: e.round_entry_id, pos: null };
+                if (e.time) row[field] = e.time;
+                if (e.position && /^\d+$/.test(e.position)) {
+                    const p = parseInt(e.position);
+                    if (field === "sq3") row.pos = p;
+                    else if (field === "sq2" && row.pos == null) row.pos = p;
+                    else if (field === "sq1" && row.pos == null) row.pos = p;
+                }
+                byEntry.set(e.round_entry_id, row);
+            }
+        };
+        addSess(sq.sq1, "sq1");
+        addSess(sq.sq2, "sq2");
+        addSess(sq.sq3, "sq3");
+
+        for (const row of byEntry.values()) {
+            const re = roundEntryInfo.get(row.re);
+            if (!re || row.pos == null) continue;
+            sqLines.push(
+                `INSERT INTO sprint_qualifying (race_id, driver_id, constructor_id, position, sq1_time, sq2_time, sq3_time) VALUES (` +
+                [
+                    sqlEscape(info.raceId),
+                    sqlEscape(re.driverSlug),
+                    sqlEscape(re.teamSlug),
+                    row.pos,
+                    sqlEscape(row.sq1 ?? null),
+                    sqlEscape(row.sq2 ?? null),
+                    sqlEscape(row.sq3 ?? null),
+                ].join(", ") + `);`
+            );
+        }
+    }
+    await writeSQL("07c_sprint_qualifying.sql", sqLines.join("\n"));
+    console.log(`✓ 07c_sprint_qualifying.sql`);
+
     // ── 08 standings (calculados desde results) ──
     const stand = [
         "DELETE FROM driver_standings;",
         "DELETE FROM constructor_standings;",
         `INSERT INTO driver_standings (season, round, driver_id, constructor_id, position, points, wins)
-   SELECT rc.season, MAX(rc.round), r.driver_id,
-     (SELECT r2.constructor_id FROM results r2 JOIN races rc2 ON r2.race_id = rc2.id
-       WHERE r2.driver_id = r.driver_id AND rc2.season = rc.season
-       ORDER BY rc2.round DESC LIMIT 1),
-     ROW_NUMBER() OVER (PARTITION BY rc.season ORDER BY SUM(r.points) DESC, SUM(CASE WHEN r.position=1 THEN 1 ELSE 0 END) DESC),
-     SUM(r.points),
-     SUM(CASE WHEN r.position=1 THEN 1 ELSE 0 END)
-   FROM results r JOIN races rc ON r.race_id = rc.id
-   GROUP BY rc.season, r.driver_id;`,
+ SELECT rc.season, MAX(rc.round), r.driver_id,
+   (SELECT r2.constructor_id FROM results r2 JOIN races rc2 ON r2.race_id = rc2.id
+     WHERE r2.driver_id = r.driver_id AND rc2.season = rc.season
+     ORDER BY rc2.round DESC LIMIT 1),
+   ROW_NUMBER() OVER (PARTITION BY rc.season ORDER BY (SUM(r.points) + COALESCE((SELECT SUM(sr.points) FROM sprint_results sr JOIN races rc3 ON sr.race_id = rc3.id WHERE sr.driver_id = r.driver_id AND rc3.season = rc.season), 0)) DESC, SUM(CASE WHEN r.position=1 THEN 1 ELSE 0 END) DESC),
+   SUM(r.points) + COALESCE((SELECT SUM(sr.points) FROM sprint_results sr JOIN races rc3 ON sr.race_id = rc3.id WHERE sr.driver_id = r.driver_id AND rc3.season = rc.season), 0),
+   SUM(CASE WHEN r.position=1 THEN 1 ELSE 0 END)
+ FROM results r JOIN races rc ON r.race_id = rc.id
+ GROUP BY rc.season, r.driver_id;`,
         `INSERT INTO constructor_standings (season, round, constructor_id, position, points, wins)
-   SELECT rc.season, MAX(rc.round), r.constructor_id,
-     ROW_NUMBER() OVER (PARTITION BY rc.season ORDER BY SUM(r.points) DESC, SUM(CASE WHEN r.position=1 THEN 1 ELSE 0 END) DESC),
-     SUM(r.points),
-     SUM(CASE WHEN r.position=1 THEN 1 ELSE 0 END)
-   FROM results r JOIN races rc ON r.race_id = rc.id
-   WHERE rc.season >= 1958
-   GROUP BY rc.season, r.constructor_id;`,
+ SELECT rc.season, MAX(rc.round), r.constructor_id,
+   ROW_NUMBER() OVER (PARTITION BY rc.season ORDER BY (SUM(r.points) + COALESCE((SELECT SUM(sr.points) FROM sprint_results sr JOIN races rc3 ON sr.race_id = rc3.id WHERE sr.constructor_id = r.constructor_id AND rc3.season = rc.season), 0)) DESC, SUM(CASE WHEN r.position=1 THEN 1 ELSE 0 END) DESC),
+   SUM(r.points) + COALESCE((SELECT SUM(sr.points) FROM sprint_results sr JOIN races rc3 ON sr.race_id = rc3.id WHERE sr.constructor_id = r.constructor_id AND rc3.season = rc.season), 0),
+   SUM(CASE WHEN r.position=1 THEN 1 ELSE 0 END)
+ FROM results r JOIN races rc ON r.race_id = rc.id
+ WHERE rc.season >= 1958
+ GROUP BY rc.season, r.constructor_id;`,
         `UPDATE seasons SET champion_driver_id = (SELECT driver_id FROM driver_standings ds WHERE ds.season = seasons.year AND ds.position = 1);`,
         `UPDATE seasons SET champion_constructor_id = (SELECT constructor_id FROM constructor_standings cs WHERE cs.season = seasons.year AND cs.position = 1);`,
-        // Marca como 'active' a quienes hayan competido en los últimos 2 años
         `UPDATE drivers SET status = 'active' WHERE id IN (
-     SELECT DISTINCT r.driver_id FROM results r
-     JOIN races rc ON r.race_id = rc.id
-     WHERE rc.season >= (SELECT MAX(season) FROM races) - 1
-   );
-   `,
+   SELECT DISTINCT r.driver_id FROM results r
+   JOIN races rc ON r.race_id = rc.id
+   WHERE rc.season >= (SELECT MAX(season) FROM races) - 1
+ );`,
         `UPDATE seasons SET champion_driver_id = NULL, champion_constructor_id = NULL
-  WHERE year IN (
-    SELECT DISTINCT season FROM races WHERE date > date('now')
-  );`,
+WHERE year IN (
+  SELECT DISTINCT season FROM races WHERE date > date('now')
+);`,
     ];
     await writeSQL("08_standings.sql", stand.join("\n"));
     console.log(`✓ 08_standings.sql`);
