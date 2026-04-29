@@ -2,7 +2,7 @@ import { Hono } from "hono";
 import { drizzle } from "drizzle-orm/d1";
 import { eq, asc, desc } from "drizzle-orm";
 import type { Env, Lang, Pagination } from "../types";
-import { races, results, qualifying } from "../db/schema";
+import { races, results, qualifying, sprintResults, sprintQualifying } from "../db/schema";
 import { paginationMiddleware } from "../middleware/pagination";
 import { cacheControl, HISTORIC_CACHE } from "../middleware/cache";
 import { notFound } from "../lib/errors";
@@ -54,6 +54,32 @@ app.get("/:id/qualifying", cacheControl(HISTORIC_CACHE), async (c) => {
     const id = c.req.param("id");
 
     const rows = await db.select().from(qualifying).where(eq(qualifying.raceId, id)).orderBy(asc(qualifying.position));
+    return c.json({ data: rows });
+});
+
+app.get("/:id/sprint", cacheControl(HISTORIC_CACHE), async (c) => {
+    const db = drizzle(c.env.DB);
+    const id = c.req.param("id");
+
+    const rows = await db
+        .select()
+        .from(sprintResults)
+        .where(eq(sprintResults.raceId, id))
+        .orderBy(asc(sprintResults.position));
+
+    return c.json({ data: rows });
+});
+
+app.get("/:id/sprint/qualifying", cacheControl(HISTORIC_CACHE), async (c) => {
+    const db = drizzle(c.env.DB);
+    const id = c.req.param("id");
+
+    const rows = await db
+        .select()
+        .from(sprintQualifying)
+        .where(eq(sprintQualifying.raceId, id))
+        .orderBy(asc(sprintQualifying.position));
+
     return c.json({ data: rows });
 });
 

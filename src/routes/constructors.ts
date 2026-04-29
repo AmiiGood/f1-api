@@ -2,7 +2,7 @@ import { Hono } from "hono";
 import { drizzle } from "drizzle-orm/d1";
 import { eq, desc, sql, countDistinct } from "drizzle-orm";
 import type { Env, Lang, Pagination } from "../types";
-import { constructors, results, races } from "../db/schema";
+import { constructors, results, races, sprintResults } from "../db/schema";
 import { paginationMiddleware } from "../middleware/pagination";
 import { cacheControl, HISTORIC_CACHE } from "../middleware/cache";
 import { getEntityTranslations } from "../lib/translations";
@@ -67,7 +67,7 @@ app.get("/:id/stats", cacheControl(HISTORIC_CACHE), async (c) => {
     const db = drizzle(c.env.DB);
     const id = c.req.param("id");
 
-    const [stats] = await db
+    const [raceStats] = await db
         .select({
             races: countDistinct(results.raceId),
             wins: sql<number>`SUM(CASE WHEN ${results.position} = 1 THEN 1 ELSE 0 END)`,
@@ -77,7 +77,27 @@ app.get("/:id/stats", cacheControl(HISTORIC_CACHE), async (c) => {
         .from(results)
         .where(eq(results.constructorId, id));
 
-    return c.json({ data: stats });
+    const [sprintStats] = await db
+        .select({
+            races: countDistinct(sprintResults.raceId),
+            wins: sql<number>`SUM(CASE WHEN ${sprintResults.position} = 1 THEN 1 ELSE 0 END)`,
+            podiums: sql<number>`SUM(CASE WHEN ${sprintResults.position} <= 3 THEN 1 ELSE 0 END)`,
+            points: sql<number>`COALESCE(SUM(${sprintResults.points}), 0)`,
+        })
+        .from(sprintResults)
+        .where(eq(sprintResults.constructorId, id));
+
+    return c.json({
+        data: {
+            race: raceStats,
+            sprint: sprintStats,
+            total: {
+                wins: (raceStats?.wins ?? 0) + (sprintStats?.wins ?? 0),
+                podiums: (raceStats?.podiums ?? 0) + (sprintStats?.podiums ?? 0),
+                points: (raceStats?.points ?? 0) + (sprintStats?.points ?? 0),
+            },
+        },
+    });
 });
 
 export default app;

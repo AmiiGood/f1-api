@@ -177,3 +177,36 @@ export const translations = sqliteTable("translations", {
     pk: primaryKey({ columns: [t.entityType, t.entityId, t.field, t.lang] }),
     lookupIdx: index("idx_translations_lookup").on(t.entityType, t.entityId, t.lang),
 }));
+
+export const sprintResults = sqliteTable("sprint_results", {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    raceId: text("race_id").notNull().references(() => races.id),
+    driverId: text("driver_id").notNull().references(() => drivers.id),
+    constructorId: text("constructor_id").notNull().references(() => constructors.id),
+    position: integer("position"),
+    positionText: text("position_text").notNull(),
+    grid: integer("grid"),
+    laps: integer("laps"),
+    timeMs: integer("time_ms"),
+    status: text("status").notNull(),
+    points: real("points").notNull().default(0),
+    fastestLap: integer("fastest_lap", { mode: "boolean" }).default(false),
+    fastestLapTime: text("fastest_lap_time"),
+}, (t) => ({
+    raceIdx: index("idx_sprint_results_race").on(t.raceId),
+    driverIdx: index("idx_sprint_results_driver").on(t.driverId),
+    constructorIdx: index("idx_sprint_results_constructor").on(t.constructorId),
+}));
+
+export const sprintQualifying = sqliteTable("sprint_qualifying", {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    raceId: text("race_id").notNull().references(() => races.id),
+    driverId: text("driver_id").notNull().references(() => drivers.id),
+    constructorId: text("constructor_id").notNull().references(() => constructors.id),
+    position: integer("position").notNull(),
+    sq1Time: text("sq1_time"),
+    sq2Time: text("sq2_time"),
+    sq3Time: text("sq3_time"),
+}, (t) => ({
+    raceIdx: index("idx_sprint_qualifying_race").on(t.raceId),
+}));

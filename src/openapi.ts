@@ -159,6 +159,20 @@ Data derived from Jolpica-F1 under non-commercial terms. If you use this API, a 
                     hasSprint: { type: "boolean" },
                 },
             },
+            SprintResult: {
+                type: "object",
+                properties: {
+                    raceId: { type: "string" },
+                    driverId: { type: "string" },
+                    constructorId: { type: "string" },
+                    position: { type: "integer", nullable: true },
+                    positionText: { type: "string", example: "1" },
+                    grid: { type: "integer", nullable: true },
+                    laps: { type: "integer", nullable: true },
+                    status: { type: "string" },
+                    points: { type: "number", description: "Sprint points (8-7-6-5-4-3-2-1 for top 8 since 2022)" },
+                },
+            },
             Result: {
                 type: "object",
                 properties: {
@@ -189,11 +203,33 @@ Data derived from Jolpica-F1 under non-commercial terms. If you use this API, a 
             DriverStats: {
                 type: "object",
                 properties: {
-                    races: { type: "integer", example: 383 },
-                    wins: { type: "integer", example: 105 },
-                    podiums: { type: "integer", example: 203 },
-                    points: { type: "number", example: 4990.5 },
-                    fastestLaps: { type: "integer", example: 68 },
+                    race: {
+                        type: "object",
+                        properties: {
+                            races: { type: "integer" },
+                            wins: { type: "integer" },
+                            podiums: { type: "integer" },
+                            points: { type: "number" },
+                            fastestLaps: { type: "integer" },
+                        },
+                    },
+                    sprint: {
+                        type: "object",
+                        properties: {
+                            races: { type: "integer" },
+                            wins: { type: "integer" },
+                            podiums: { type: "integer" },
+                            points: { type: "number" },
+                        },
+                    },
+                    total: {
+                        type: "object",
+                        properties: {
+                            wins: { type: "integer" },
+                            podiums: { type: "integer" },
+                            points: { type: "number" },
+                        },
+                    },
                 },
             },
             Rivalry: {
@@ -370,6 +406,23 @@ Data derived from Jolpica-F1 under non-commercial terms. If you use this API, a 
                 summary: "Get qualifying results",
                 parameters: [{ name: "id", in: "path", required: true, schema: { type: "string", example: "2024-italian-gp" } }],
                 responses: { "200": { description: "Qualifying results with Q1/Q2/Q3 times" } },
+            },
+        },
+        "/v1/races/{id}/sprint": {
+            get: {
+                tags: ["Races"],
+                summary: "Get sprint race results",
+                description: "Sprint race results. Returns 200 with empty array if the race had no sprint.",
+                parameters: [{ name: "id", in: "path", required: true, schema: { type: "string", example: "2024-brazilian-gp" } }],
+                responses: { "200": { description: "Sprint results ordered by finishing position" } },
+            },
+        },
+        "/v1/races/{id}/sprint/qualifying": {
+            get: {
+                tags: ["Races"],
+                summary: "Get sprint qualifying / shootout results",
+                parameters: [{ name: "id", in: "path", required: true, schema: { type: "string", example: "2024-brazilian-gp" } }],
+                responses: { "200": { description: "Sprint qualifying results with SQ1/SQ2/SQ3 times" } },
             },
         },
         "/v1/drivers": {
