@@ -32,7 +32,7 @@ Public endpoints. Maximum 60 requests per minute per IP. Please cache responses 
 ### Attribution
 Data derived from Jolpica-F1 under non-commercial terms. If you use this API, a link back is appreciated.
 `.trim(),
-        contact: { name: "Sweet Code", url: "https://sweetcode.dev" },
+        contact: { name: "Sweet Code", url: "https://sweetcode.app" },
         license: { name: "Data: CC BY 4.0 (Jolpica)", url: "https://creativecommons.org/licenses/by/4.0/" },
     },
     servers: [
