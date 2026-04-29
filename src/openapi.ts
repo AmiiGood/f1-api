@@ -6,7 +6,7 @@ export const openApiSpec = {
         description: `
 A free, developer-friendly Formula 1 API with historical data from 1950 to present.
 
-**Built by [Sweet Code](https://sweetcode.dev)** · Data sourced from [Jolpica-F1](https://jolpi.ca).
+**Built by [Sweet Code](https://sweetcode.app)** · Data sourced from [Jolpica-F1](https://jolpi.ca).
 
 ### Features
 - 76+ seasons, 1,173+ races, 879+ drivers, 214+ constructors
@@ -14,13 +14,24 @@ A free, developer-friendly Formula 1 API with historical data from 1950 to prese
 - Curated rivalries and records
 - Bilingual content (EN/ES) via \`?lang=es\`
 - Paginated responses with \`limit\` and \`offset\`
+- Images for drivers, constructors, and circuits
+
+### Images
+Drivers, constructors, and circuits include image URLs (\`imageUrl\`, \`logoUrl\`, \`photoUrl\`) when available, served from a dedicated CDN at [\`assets.sweetcode.app\`](https://assets.sweetcode.app).
+
+Image specs:
+- **Drivers**: 400×400 WebP, square crop
+- **Constructors**: 400×400 WebP (logos)
+- **Circuits**: 800px wide WebP, landscape
+
+Coverage: ~65% of drivers, ~75% of constructors, 100% of circuits. Sourced from Wikipedia/Wikidata under CC-BY-SA. \`null\` when not available.
 
 ### Rate limits
-Public endpoints. Please be respectful — cache responses when you can.
+Public endpoints. Maximum 60 requests per minute per IP. Please cache responses on your end when possible.
 
 ### Attribution
 Data derived from Jolpica-F1 under non-commercial terms. If you use this API, a link back is appreciated.
-    `.trim(),
+`.trim(),
         contact: { name: "Sweet Code", url: "https://sweetcode.dev" },
         license: { name: "Data: CC BY 4.0 (Jolpica)", url: "https://creativecommons.org/licenses/by/4.0/" },
     },
@@ -36,6 +47,7 @@ Data derived from Jolpica-F1 under non-commercial terms. If you use this API, a 
         { name: "Champions", description: "World champions since 1950" },
         { name: "Rivalries", description: "Curated legendary rivalries" },
         { name: "Records", description: "All-time records and milestones" },
+        { name: "Assets", description: "Image assets served from assets.sweetcode.app" },
     ],
     components: {
         parameters: {
@@ -72,9 +84,15 @@ Data derived from Jolpica-F1 under non-commercial terms. If you use this API, a 
                     dateOfBirth: { type: "string", format: "date", nullable: true },
                     dateOfDeath: { type: "string", format: "date", nullable: true },
                     status: { type: "string", enum: ["active", "retired", "deceased"] },
-                    imageUrl: { type: "string", nullable: true },
                     wikipediaUrl: { type: "string", nullable: true },
                     bio: { type: "string", nullable: true, description: "Biography (only in single-driver endpoint, translated)" },
+                    imageUrl: {
+                        type: "string",
+                        nullable: true,
+                        format: "uri",
+                        example: "https://assets.sweetcode.app/drivers/max-verstappen.webp",
+                        description: "400×400 WebP image. Hosted at assets.sweetcode.app. Null when not available.",
+                    },
                 },
             },
             Constructor: {
@@ -87,7 +105,13 @@ Data derived from Jolpica-F1 under non-commercial terms. If you use this API, a 
                     baseLocation: { type: "string", nullable: true },
                     foundedYear: { type: "integer", nullable: true },
                     primaryColor: { type: "string", nullable: true, example: "#DC0000" },
-                    logoUrl: { type: "string", nullable: true },
+                    logoUrl: {
+                        type: "string",
+                        nullable: true,
+                        format: "uri",
+                        example: "https://assets.sweetcode.app/constructors/ferrari.webp",
+                        description: "400×400 WebP logo. Hosted at assets.sweetcode.app. Null when not available.",
+                    },
                     wikipediaUrl: { type: "string", nullable: true },
                 },
             },
@@ -104,6 +128,13 @@ Data derived from Jolpica-F1 under non-commercial terms. If you use this API, a 
                     longitude: { type: "number", nullable: true },
                     layoutSvgUrl: { type: "string", nullable: true },
                     wikipediaUrl: { type: "string", nullable: true },
+                    photoUrl: {
+                        type: "string",
+                        nullable: true,
+                        format: "uri",
+                        example: "https://assets.sweetcode.app/circuits/monza.webp",
+                        description: "Landscape WebP photo (800px wide). Hosted at assets.sweetcode.app. Null when not available.",
+                    },
                 },
             },
             Season: {
@@ -503,6 +534,32 @@ Data derived from Jolpica-F1 under non-commercial terms. If you use this API, a 
                 summary: "Records filtered by category",
                 parameters: [{ name: "category", in: "path", required: true, schema: { type: "string", enum: ["driver", "constructor", "race"] } }],
                 responses: { "200": { description: "Records in category" } },
+            },
+        },
+        "https://assets.sweetcode.app/{type}/{id}.webp": {
+            get: {
+                tags: ["Assets"],
+                summary: "Get an image asset",
+                description: "Direct access to image assets. Use the URL exactly as returned in `imageUrl`/`logoUrl`/`photoUrl` fields.",
+                servers: [{ url: "https://assets.sweetcode.app", description: "Assets CDN" }],
+                parameters: [
+                    {
+                        name: "type",
+                        in: "path",
+                        required: true,
+                        schema: { type: "string", enum: ["drivers", "constructors", "circuits"] },
+                    },
+                    {
+                        name: "id",
+                        in: "path",
+                        required: true,
+                        schema: { type: "string", example: "max-verstappen" },
+                    },
+                ],
+                responses: {
+                    "200": { description: "WebP image", content: { "image/webp": {} } },
+                    "404": { description: "Asset not found" },
+                },
             },
         },
     },
