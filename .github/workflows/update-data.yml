@@ -44,8 +44,7 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
           npx wrangler d1 execute f1-api-db --remote -y --command "
-          UPDATE seasons SET champion_driver_id = NULL, champion_constructor_id = NULL;
-          UPDATE circuits SET lap_record_driver_id = NULL;
+          PRAGMA defer_foreign_keys = ON;
           DELETE FROM translations;
           DELETE FROM rivalry_key_races;
           DELETE FROM rivalries;
@@ -56,9 +55,9 @@ jobs:
           DELETE FROM results;
           DELETE FROM races;
           DELETE FROM seasons;
+          DELETE FROM circuits;
           DELETE FROM drivers;
           DELETE FROM constructors;
-          DELETE FROM circuits;
           "
 
       - name: Apply SQL files to remote D1
